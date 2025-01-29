@@ -7,21 +7,62 @@ library(htmltools)
 library(htmlwidgets)
 library(leaflet)
 library(leaflet.extras)
+#pak::pak("rstudio/leaflet.providers")
 
 #mapgl::maplibre()
 
-url <- "https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
+library(leaflet.providers)
 
-leaflet()  |> 
-  #addTiles(group = "OpenStreetMap (France)") |> 
-  addTiles(group = "OSM (default)")  |> 
-  setView(lng = 90, lat = 50, zoom = 2) |> 
-  addProviderTiles(providers$CartoDB.Positron
-                   , group = "CartoDB Positron")  |> 
+str(providers_default(), max.level = 2)
+
+url <- "https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
+url1 <- "https://{s}.tile.openstreetmap.en/osmen/{z}/{x}/{y}.png"
+
+leaflet() |> 
+  addTiles(group = "OpenStreepMap") |> 
+  addProviderTiles("OpenStreetMap.France"
+                   , group = "Open Street Map French") |> 
   addProviderTiles(providers$Esri.WorldImagery
-                   , group = "Esri Satellite") |> 
+                   , group = "Satellite") |>
+  setView(lng = 90, lat = 50, zoom = 2) |> 
+  addLayersControl(
+    baseGroups = c("OpenStreepMap", "OpenStreetMap French", "Satellite")
+    , position = "topright"
+    , options = layersControlOptions(collapsed = FALSE)
+  ) |> 
+addControl(
+  html = "<b>Carte interactive de l'Asie</b>",  # HTML title in French
+  position = "topleft")
+
+leaflet()  %>% 
+  addTiles(urlTemplate = url, group = "French place names") |> 
+  addProviderTiles(providers$MapTilesAPI.OSMEnglish
+                   , group = "English place names") |> 
+  addProviderTiles(providers$CartoDB.Positron
+                   , group = "CartoDB Positron") |> 
+  addProviderTiles(providers$Esri.WorldImagery
+                   , group = "Esri Satellite") |>
+  setView(lng = 90, lat = 50, zoom = 2) |> 
+  addLayersControl(
+    baseGroups = c("French place names"
+                   , "English place names"
+                   , "CartoDB Positron"
+                   , "Esri Satellite")
+    , position = "topright"
+    , options = layersControlOptions(collapsed = FALSE)
+  ) |> 
+  
+
+
+  #addTiles(group = "OpenStreetMap (France)") |> 
+  addTiles(group = "OSM (default)")  %>% 
+  setView(lng = 90, lat = 50, zoom = 2) %>% 
+  addProviderTiles(providers$CartoDB.Positron
+                   , group = "CartoDB Positron")  %>% 
+  addProviderTiles(providers$Esri.WorldImagery
+                   , group = "Esri Satellite") %>% 
   addProviderTiles(providers$Stamen.Terrain
-                   , group = "Stamen Terrain") |> 
+                   , group = "Stamen Terrain") %>%
   addLayersControl(
     baseGroups = c("OSM (default)"
                    , "CartoDB Positron"
@@ -75,9 +116,27 @@ library(htmlwidgets)
   
   outline <- quakes[chull(quakes$long, quakes$lat),]
   
-  map <- leaflet(quakes) %>%
-    # Base groups
-    addTiles(group = "OSM (default)") %>%
+map <- leaflet() |> 
+  addTiles(urlTemplate = url
+           , group = "OSM (default)") |>  # Default OSM layer
+  setView(lng = 100, lat = 30, zoom = 3) |>  # Ensure initial view is set
+  addProviderTiles(providers$CartoDB.Positron
+                   , group = "CartoDB Positron") |> 
+  addProviderTiles(providers$Esri.WorldImagery
+                   , group = "Esri Satellite") |> 
+  addProviderTiles(providers$Stamen.Terrain
+                   , group = "Stamen Terrain") |> 
+  addLayersControl(
+    baseGroups = c("OSM (default)"
+                   , "CartoDB Positron"
+                   , "Esri Satellite"
+                   , "Stamen Terrain"),
+    position = "topright",
+    options = layersControlOptions(collapsed = FALSE)
+  )
+ 
+map
+group = "OSM (default)") %>%
     addProviderTiles(providers$CartoDB.Positron, group = "Positron (minimal)") %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery (satellite)") %>%
     # Overlay groups
@@ -94,17 +153,4 @@ library(htmlwidgets)
     )
   map  
 
-  library(leaflet)
-  
-  leaflet() |> 
-    addTiles(group = "OSM (default)") |>  # Default OSM layer
-    setView(lng = 100, lat = 30, zoom = 3) |>  # Ensure initial view is set
-    addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") |> 
-    addProviderTiles(providers$Esri.WorldImagery, group = "Esri Satellite") |> 
-    addProviderTiles(providers$Stamen.Terrain, group = "Stamen Terrain") |> 
-    addLayersControl(
-      baseGroups = c("OSM (default)", "CartoDB Positron", "Esri Satellite", "Stamen Terrain"),
-      position = "topright",
-      options = layersControlOptions(collapsed = FALSE)
-    )
   
